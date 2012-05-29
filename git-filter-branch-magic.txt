@@ -1,0 +1,11 @@
+find . -name .git -prune -o -type d -o -print | grep -v Ant | grep -v ant | xargs rm -f
+
+# TODO: need to generalize the filtering logic
+# git update-index generates no index file if stdin is empty
+# this also reduces empty commits as much as possible
+# "ant\|Ant"
+git filter-branch -f --prune-empty --msg-filter ~/ws/git-filter-branch-tools/record-original-commit.sh --index-filter 'git ls-files -s | grep "Javadoc\|javadoc" | GIT_INDEX_FILE=$GIT_INDEX_FILE.new git update-index --index-info && ((test -f $GIT_INDEX_FILE.new && mv $GIT_INDEX_FILE.new $GIT_INDEX_FILE) || rm -f $GIT_INDEX_FILE)' HEAD
+
+# remove all the other pointless merges
+git filter-branch -f --commit-filter "~/ws/git-filter-branch-tools/remove-pointless-commit.rb \"\$@\"" HEAD
+
